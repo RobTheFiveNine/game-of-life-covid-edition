@@ -4,6 +4,8 @@ import { createUniverse, nextGeneration, State } from '../universe';
 const width = 10;
 const height = 5;
 const unitProbability = 0.2;
+const infectionRate = 0.05;
+const deathRate = 0.03;
 
 // Generated Grid
 // ==============
@@ -47,11 +49,27 @@ describe('.createUniverse', () => {
     for (let hi = 0; hi < height; hi += 1) {
       for (let wi = 0; wi < width; wi += 1) {
         const rng = numbers[(hi * width) + wi];
-        expect(universe[hi][wi]).toBe(
-          rng <= unitProbability ? State.ALIVE : State.DEAD,
-        );
+        if (rng <= unitProbability) {
+          expect(universe[hi][wi] & State.ALIVE).toBe(State.ALIVE);
+        } else {
+          expect(universe[hi][wi] & State.DEAD).toBe(State.DEAD);
+        }
       }
     }
+  });
+
+  it('should use the specified infection rate for initial infections', () => {
+    const universe = createUniverse({
+      size: { width, height },
+      unitProbability,
+      infectionRate,
+    });
+
+    expect(universe[2][2] & State.ALIVE).toBe(State.ALIVE);
+    expect(universe[2][2] & State.INFECTED).toBe(State.INFECTED);
+
+    expect(universe[3][2] & State.ALIVE).toBe(State.ALIVE);
+    expect(universe[3][2] & State.INFECTED).toBe(State.INFECTED);
   });
 });
 
@@ -62,13 +80,14 @@ describe('.nextGeneration', () => {
     universe = createUniverse({
       size: { width, height },
       unitProbability,
+      infectionRate,
     });
   });
 
   it('should kill cells with fewer than two live neighbours', () => {
-    expect(universe[0][3]).toBe(State.ALIVE);
+    expect(universe[0][3] & State.ALIVE).toBe(State.ALIVE);
     const newState = nextGeneration(universe, {});
-    expect(newState[0][3]).toBe(State.DEAD);
+    expect(newState[0][3] & State.DEAD).toBe(State.DEAD);
   });
 
   it('should kill cells with more than three live neighbours', () => {
@@ -87,11 +106,11 @@ describe('.nextGeneration', () => {
     // X|X|X|O|X|O|O|X|X|X
 
     const newState = nextGeneration(universe, {});
-    expect(newState[0][3]).toBe(State.DEAD);
-    expect(newState[1][3]).toBe(State.DEAD);
-    expect(newState[1][2]).toBe(State.DEAD);
-    expect(newState[1][4]).toBe(State.DEAD);
-    expect(newState[2][3]).toBe(State.DEAD);
+    expect(newState[0][3] & State.DEAD).toBe(State.DEAD);
+    expect(newState[1][3] & State.DEAD).toBe(State.DEAD);
+    expect(newState[1][2] & State.DEAD).toBe(State.DEAD);
+    expect(newState[1][4] & State.DEAD).toBe(State.DEAD);
+    expect(newState[2][3] & State.DEAD).toBe(State.DEAD);
   });
 
   it('should not kill cells with two or three live neighbours', () => {
@@ -108,9 +127,9 @@ describe('.nextGeneration', () => {
     // X|X|X|O|X|O|O|X|X|X
 
     const newState = nextGeneration(universe, {});
-    expect(newState[0][3]).toBe(State.ALIVE);
-    expect(newState[0][5]).toBe(State.ALIVE);
-    expect(newState[3][1]).toBe(State.ALIVE);
+    expect(newState[0][3] & State.ALIVE).toBe(State.ALIVE);
+    expect(newState[0][5] & State.ALIVE).toBe(State.ALIVE);
+    expect(newState[3][1] & State.ALIVE).toBe(State.ALIVE);
   });
 
   it('should respawn dead cells with exactly three live neighbours', () => {
@@ -122,11 +141,23 @@ describe('.nextGeneration', () => {
     // X|X|O|X|X|X|X|X|X|X
     // X|X|X|O|X|O|O|X|X|X
 
-    expect(universe[3][3]).toBe(State.DEAD);
-    expect(universe[3][6]).toBe(State.DEAD);
+    expect(universe[3][3] & State.DEAD).toBe(State.DEAD);
+    expect(universe[3][6] & State.DEAD).toBe(State.DEAD);
 
     const newState = nextGeneration(universe, {});
-    expect(newState[3][3]).toBe(State.ALIVE);
-    expect(newState[3][6]).toBe(State.ALIVE);
+    expect(newState[3][3] & State.ALIVE).toBe(State.ALIVE);
+    expect(newState[3][6] & State.ALIVE).toBe(State.ALIVE);
+  });
+
+  it('should have a chance to kill infected cells', () => {
+    expect(universe[3][2] & State.INFECTED).toBe(State.INFECTED);
+    const newState = nextGeneration(universe, { infectionRate, deathRate });
+    expect(newState[3][2]).toBe(State.DEAD);
+  });
+
+  it('should have a chance to infect neighbouring cells', () => {
+    expect(universe[4][3] & State.INFECTED).toBe(0);
+    const newState = nextGeneration(universe, { infectionRate });
+    expect(newState[4][3] & State.INFECTED).toBe(State.INFECTED);
   });
 });

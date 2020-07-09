@@ -4,16 +4,16 @@ export const State = {
   INFECTED: 2,
 };
 
+
+
 export function nextGeneration(universe, { infectionRate, deathRate }) {
-  const nextGen = [];
+  const nextGen = JSON.parse(JSON.stringify(universe));
   const size = {
     w: universe[0].length,
     h: universe.length,
   };
 
   for (let row = 0; row < size.h; row += 1) {
-    nextGen.push(new Array(size.w));
-
     const bottom = (row + 1 + size.h) % size.h;
     const top = (row + -1 + size.h) % size.h;
 
@@ -21,22 +21,22 @@ export function nextGeneration(universe, { infectionRate, deathRate }) {
       const left = (col + -1 + size.w) % size.w;
       const right = (col + 1 + size.w) % size.w;
 
-      const neighbours = [
-        universe[row][left], // left
-        universe[row][right], // right
-        universe[top][left], // top left
-        universe[top][col], // top
-        universe[top][right], // top right
-        universe[bottom][left], // bottom left
-        universe[bottom][col], // bottom
-        universe[bottom][right], // bottom right
+      const neighbourIndexes = [
+        [row, left],
+        [row, right],
+        [top, left],
+        [top, col],
+        [top, right],
+        [bottom, left],
+        [bottom, col],
+        [bottom, right],
       ];
 
-      const liveNeighbours = neighbours.filter((n) => n === State.ALIVE).length;
+      const liveNeighbours = neighbourIndexes.filter(
+        (i) => (universe[i[0]][i[1]] & State.ALIVE) === State.ALIVE,
+      ).length;
 
-      nextGen[row][col] = universe[row][col];
-
-      if (universe[row][col] === State.ALIVE) {
+      if ((universe[row][col] & State.ALIVE) === State.ALIVE) {
         if (liveNeighbours < 2) {
           nextGen[row][col] = State.DEAD;
         } else if (liveNeighbours > 3) {
@@ -45,6 +45,22 @@ export function nextGeneration(universe, { infectionRate, deathRate }) {
       } else if (universe[row][col] === State.DEAD) {
         if (liveNeighbours === 3) {
           nextGen[row][col] = State.ALIVE;
+        }
+      }
+
+      // Infect neighbouring cells and roll death dice.
+      if ((nextGen[row][col] & State.INFECTED) === State.INFECTED) {
+        for (let i = 0; i < neighbourIndexes.length; i += 1) {
+          const ni = neighbourIndexes[i];
+          if ((nextGen[ni[0]][ni[1]] & State.ALIVE) === State.ALIVE) {
+            if (Math.random() <= infectionRate) {
+              nextGen[ni[0]][ni[1]] |= State.INFECTED;
+            }
+          }
+        }
+
+        if (Math.random() <= deathRate) {
+          nextGen[row][col] = State.DEAD;
         }
       }
     }
@@ -60,7 +76,12 @@ export function createUniverse({ size, unitProbability, infectionRate }) {
     universe.push([]);
 
     for (let col = 0; col < size.width; col += 1) {
-      universe[row].push(Math.random() <= unitProbability ? State.ALIVE : State.DEAD);
+      const rn = Math.random();
+      universe[row].push(rn <= unitProbability ? State.ALIVE : State.DEAD);
+
+      if (rn <= infectionRate) {
+        universe[row][col] |= State.INFECTED;
+      }
     }
   }
 
