@@ -4,8 +4,6 @@ export const State = {
   INFECTED: 2,
 };
 
-
-
 export function nextGeneration(universe, { infectionRate, deathRate }) {
   const nextGen = JSON.parse(JSON.stringify(universe));
   const size = {
