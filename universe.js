@@ -46,12 +46,18 @@ export function nextGeneration(universe, { infectionRate, deathRate }) {
         }
       }
 
+      if (nextGen[row][col] === State.ALIVE) {
+        if (Math.random() <= infectionRate) {
+          nextGen[row][col] |= State.INFECTED;
+        }
+      }
+
       // Infect neighbouring cells and roll death dice.
       if ((nextGen[row][col] & State.INFECTED) === State.INFECTED) {
         for (let i = 0; i < neighbourIndexes.length; i += 1) {
           const ni = neighbourIndexes[i];
           if ((nextGen[ni[0]][ni[1]] & State.ALIVE) === State.ALIVE) {
-            if (Math.random() <= infectionRate) {
+            if (Math.random() <= infectionRate * 2) {
               nextGen[ni[0]][ni[1]] |= State.INFECTED;
             }
           }
