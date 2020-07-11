@@ -1,12 +1,143 @@
 <!DOCTYPE html>
 <html>
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    html, body {
+      font-family: 'Roboto',sans-serif;
+      font-weight: 300;
+      margin-bottom: 25px;
+    }
+    
+    .container {
+      text-align: center;
+    }
+
+    canvas {
+      margin-top: 25px;
+      margin-bottom: 15px;
+    }
+
+    .buttons {
+      display: block;
+    }
+
+    h1 {
+      font-weight: 500;
+      margin-bottom: 0;
+    }
+
+    h2 {
+      font-weight: 400;
+      margin-bottom: 0;
+    }
+
+    .button {
+      cursor: pointer;
+      display:inline-block;
+      padding:0.35em 1.2em;
+      border:0.1em solid #000;
+      margin:0 0.3em 0.3em 0;
+      border-radius:0.12em;
+      box-sizing: border-box;
+      text-decoration:none;
+      font-weight:300;
+      color:#000;
+      text-align:center;
+      transition: all 0.2s;
+      min-width: 100px;
+    }
+
+    .button:hover {
+      color:#fff;
+      background-color:#000;
+    }
+
+    .about {
+      width: 900px;
+      margin: 0 auto;
+      text-align: justify;
+    }
+
+    small {
+      display: block;
+      margin-bottom: 15px;
+    }
+
+    @media (max-width: 925px) {
+      .container, .about, canvas {
+        width: 100% !important;
+      }
+
+      body {
+        margin-left: 25px;
+        margin-right: 25px;
+        margin-top: 25px;
+      }
+    }
+
+    @media (max-width: 600px) {
+      small {
+        font-size: 0.7em;
+      }
+
+      .button {
+        display: block;
+      }
+    }
+  </style>
+</head>
 <body>
 
-<canvas id="canvas" width="900" height="600" style="border:1px solid #d3d3d3;">
-Your browser does not support the HTML5 canvas tag.</canvas>
+  <div class="container">
+    <h1>Game of Life: Covid Edition</h1>
 
-<button id="startButton" type="button">Start</button>
-<button id="resetButton" type="button">Reset</button>
+    <canvas id="canvas" width="900" height="600" style="border:1px solid #d3d3d3;">
+      Your browser does not support the HTML5 canvas tag.
+    </canvas>
 
+    <small>
+      Generation: <span id="generation">0</span> | Infection Rate: <span id="infectionRate">0.01</span> | Death Rate: <span id="deathRate">0.03</span> | Initial Spawn Rate: <span id="spawnRate">0.2</span>
+    </small>
+
+    <div class="buttons">
+      <a id="startButton" class="button">Start</a>
+      <a id="resetButton" class="button">Reset</a>
+    </div>
+
+    <div class="about">
+      <h2>What is Game of Life?</h2>
+      <p>
+        The universe of the Game of Life is an infinite, two-dimensional orthogonal grid of square cells, each of which is in one of two possible states, live or dead, (or populated and unpopulated, respectively). Every cell interacts with its eight neighbours, which are the cells that are horizontally, vertically, or diagonally adjacent. At each step in time, the following transitions occur:
+        
+        <ol>
+          <li>Any live cell with fewer than two live neighbours dies, as if by underpopulation.</li>
+          <li>Any live cell with two or three live neighbours lives on to the next generation.</li>
+          <li>Any live cell with more than three live neighbours dies, as if by overpopulation.</li>
+          <li>Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.</li>
+        </ol>
+        
+        These rules, which compare the behavior of the automaton to real life, can be condensed into the following:
+
+        <ol>
+          <li>Any live cell with two or three live neighbours survives.</li>
+          <li>Any dead cell with three live neighbours becomes a live cell.</li>
+          <li>All other live cells die in the next generation. Similarly, all other dead cells stay dead.</li>
+        </ol>
+
+        The initial pattern constitutes the seed of the system. The first generation is created by applying the above rules simultaneously to every cell in the seed; births and deaths occur simultaneously, and the discrete moment at which this happens is sometimes called a tick. Each generation is a pure function of the preceding one. The rules continue to be applied repeatedly to create further generations.
+      </p>
+
+      <h2>What is Different About This Version?</h2>
+      <p>
+        I have added the posibility for cells to develop or catch a contagious virus, which can also lead to their death. Infected cells are displayed on the grid as green cells and can spread the infection to any of the eight neighbouring cells.
+      </p>
+
+      <h2>Source pls</h2>
+      <p>
+        If you want the source code, you can find it on GitHub at: <a href="https://github.com/RobTheFiveNine/game-of-life-covid-edition" target="_blank">https://github.com/RobTheFiveNine/game-of-life-covid-edition</a>. If you have any questions about any of the code, you can ping me on Twitter at <a href="https://twitter.com/robthefivenine">@RobTheFiveNine</a>.
+      </p>
+    </div>
+  </div>
 </body>
 </html>
